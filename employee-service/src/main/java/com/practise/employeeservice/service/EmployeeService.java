@@ -3,6 +3,7 @@ package com.practise.employeeservice.service;
 import com.practise.employeeservice.dto.APIResponseDto;
 import com.practise.employeeservice.dto.DepartmentDto;
 import com.practise.employeeservice.dto.EmployeeDto;
+import com.practise.employeeservice.dto.OrganizationDto;
 import com.practise.employeeservice.entity.Employee;
 import com.practise.employeeservice.repository.EmployeeRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -24,6 +26,7 @@ public class EmployeeService {
 //    private RestTemplate restTemplate;
 //    private WebClient.Builder webClient;
     private APIClient apiClient;
+    private APIOrganizationClient apiOrganizationClient;
 
 
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -58,7 +61,8 @@ public class EmployeeService {
             // By Using spring cloud open Feign
             DepartmentDto department= apiClient.getDepartmentByCode(employee.get().getDepartmentCode());
 
-            return new APIResponseDto(toDto(employee.get()),department);
+            OrganizationDto organization= apiOrganizationClient.getOrganizationByCode(employee.get().getOrganizationCode());
+            return new APIResponseDto(toDto(employee.get()),department, organization);
         }
         else{
             throw new RuntimeException("No Employee Exists with the provided Details");
@@ -69,7 +73,8 @@ public class EmployeeService {
         Optional<Employee> employee = employeeRepository.findByEmailIgnoreCaseContaining(email);
         if(employee.isPresent()){
             DepartmentDto department= new DepartmentDto(2L,"Default","Default","Default");
-            return new APIResponseDto(toDto(employee.get()),department);
+            OrganizationDto organization= new OrganizationDto(2L,"Default","Default","Default");
+            return new APIResponseDto(toDto(employee.get()),department,organization);
         }
         else{
             throw new RuntimeException("No Employee Exists with the provided Details");
